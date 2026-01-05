@@ -32,7 +32,7 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-console.log("JWT_SECRET:", process.env.JWT_SECRET);
+
 
 
 // routes
@@ -72,7 +72,7 @@ app.get("/api/test-auth", authMiddleware, (req, res) => {
     user: req.user.email
   });
 });
-console.log("JWT_SECRET loaded:", !!process.env.JWT_SECRET);
+
 
 // start server (LAST)
 app.listen(PORT, () =>

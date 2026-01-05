@@ -28,18 +28,14 @@ function setupFilters() {
     });
   }
 
-  // Category Buttons
-  const buttons = document.querySelectorAll("#categoryFilters button");
-  buttons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      // Update active state
-      buttons.forEach(b => b.classList.replace("btn-primary", "btn-secondary"));
-      btn.classList.replace("btn-secondary", "btn-primary");
-
-      currentCategory = btn.getAttribute("data-cat");
+  // Category Dropdown (New)
+  const categorySelect = document.getElementById("categorySelect");
+  if (categorySelect) {
+    categorySelect.addEventListener("change", (e) => {
+      currentCategory = e.target.value;
       applyFilters();
     });
-  });
+  }
 }
 
 function applyFilters() {
@@ -51,7 +47,10 @@ function applyFilters() {
     const textToSearch = `${skill.name} ${skill.tutorName || ""} ${skill.outcome || ""}`.toLowerCase();
     const searchMatch = !searchTerm || textToSearch.includes(searchTerm);
 
-    return catMatch && searchMatch;
+    // 3. Must have Video (User Request: "only see available video content")
+    const hasVideo = skill.videoUrl && skill.videoUrl.trim() !== "";
+
+    return catMatch && searchMatch && hasVideo;
   });
   renderSkills(filtered);
 }
@@ -59,8 +58,12 @@ function applyFilters() {
 async function fetchSkills() {
   try {
     const res = await fetch("http://localhost:5000/api/skills", {
-      headers: { "x-auth-token": token },
+      headers: { "Authorization": `Bearer ${token}` },
     });
+    if (res.status === 401) {
+      handleAuthError();
+      return;
+    }
     allSkills = await res.json(); // Store globally
 
     // Also fetch user credit balance for display
@@ -71,6 +74,12 @@ async function fetchSkills() {
     console.error(err);
     showToast("Failed to load skills", true);
   }
+}
+
+function handleAuthError() {
+  alert("Session expired. Please login again.");
+  localStorage.removeItem("token");
+  window.location.href = "login.html";
 }
 
 function renderSkills(skills) {
@@ -93,50 +102,13 @@ function renderSkills(skills) {
     if (skill.isTeaching) {
       statusBadge = `<span class="badge badge-primary">You Teach This</span>`;
       // Show Video for Teacher
-      if (skill.videoUrl) {
-        actionBtn += `
-            <div style="margin-bottom: 10px;">
-                <video src="${skill.videoUrl}" controls style="width: 100%; border-radius: 8px;"></video>
-            </div>`;
-      }
-      actionBtn += `<button class="btn btn-secondary" disabled style="width:100%">Teaching</button>`;
-
-    } else if (skill.isLearning) {
-      statusBadge = `<span class="badge badge-green">In Progress</span>`;
-
-      // Show Video for Learner
-      if (skill.videoUrl) {
-        actionBtn += `
-            <div style="margin-bottom: 10px;">
-                <label style="font-size:0.8rem; color:var(--primary); margin-bottom:4px; display:block;">🎥 Class Recording:</label>
-                <video src="${skill.videoUrl}" controls style="width: 100%; border-radius: 8px;"></video>
-            </div>`;
-      }
-
-      actionBtn += `
-        <button class="btn btn-primary" onclick="completeSkill('${skill._id}', '${skill.createdBy}')" style="width:100%">
-          Target Complete & Rate
-        </button>`;
-
-    } else {
-      // Not learning, not teaching.
-      // Check if can afford
-      const canAfford = currentUser ? currentUser.credits.available >= skill.creditCost : true;
-
-      const enrollBtn = `
-            <button class="btn btn-primary" onclick="enrollSkill('${skill._id}')" ${!canAfford ? 'disabled' : ''} style="width:100%">
-                Enroll (-${skill.creditCost} Credits)
-            </button>
-        `;
-
-      const teachBtn = `
-            <button class="btn btn-secondary" onclick="teachSkill('${skill._id}')" style="width:100%; margin-top: 8px;">
-                Teach This
-            </button>
-        `;
-
-      actionBtn = enrollBtn + teachBtn;
     }
+
+    // Always show video if it exists (Filtered by hasVideo, so it should exist)
+    const videoPlayer = skill.videoUrl ? `
+        <div style="margin-bottom: 12px; border-radius: 8px; overflow: hidden; background: #000;">
+            <video src="${skill.videoUrl}" controls preload="metadata" style="width: 100%; aspect-ratio: 16/9; display: block;"></video>
+        </div>` : "";
 
     card.innerHTML = `
       <div class="flex justify-between items-start mb-2">
@@ -147,6 +119,8 @@ function renderSkills(skills) {
         ${statusBadge}
       </div>
       
+      ${videoPlayer}
+
       <div style="margin-bottom: 1rem;">
         <p style="font-size: 0.9rem; font-weight: bold; color: #ccc; margin-bottom: 4px;">Outcome:</p>
         <p style="color: var(--text-muted); font-size: 0.9rem; min-height: 40px;">
@@ -174,7 +148,7 @@ async function enrollSkill(id) {
   try {
     const res = await fetch(`http://localhost:5000/api/skills/learn/${id}`, {
       method: "POST",
-      headers: { "x-auth-token": token },
+      headers: { "Authorization": `Bearer ${token}` },
     });
     const data = await res.json();
 
@@ -193,7 +167,7 @@ async function teachSkill(id) {
   try {
     const res = await fetch(`http://localhost:5000/api/skills/teach/${id}`, {
       method: "POST",
-      headers: { "x-auth-token": token },
+      headers: { "Authorization": `Bearer ${token}` },
     });
     const data = await res.json();
 
@@ -214,7 +188,7 @@ async function completeSkill(skillId, teacherId) {
   try {
     const res = await fetch(`http://localhost:5000/api/skills/complete/${skillId}`, {
       method: "POST",
-      headers: { "x-auth-token": token },
+      headers: { "Authorization": `Bearer ${token}` },
     });
     const data = await res.json();
 
@@ -247,7 +221,7 @@ window.submitRating = async () => {
   try {
     const res = await fetch(`http://localhost:5000/api/skills/rate/${pendingTeacherId}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-auth-token": token },
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
       body: JSON.stringify({ rating: Number(val) })
     });
 
@@ -263,4 +237,20 @@ window.closeModal = () => {
   document.getElementById("rateModal").style.display = "none";
   pendingTeacherId = null;
   fetchSkills(); // Refresh UI to show 'Teach' option now available or updated state
+}
+
+async function fetchProfile() {
+  if (!token) return;
+  try {
+    const res = await fetch("http://localhost:5000/api/profile/me", {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    if (res.ok) {
+      currentUser = await res.json();
+      const credEl = document.getElementById("creditDisplay");
+      if (credEl && currentUser.credits) {
+        credEl.textContent = currentUser.credits.available;
+      }
+    }
+  } catch (e) { console.error("Profile fetch error", e); }
 }

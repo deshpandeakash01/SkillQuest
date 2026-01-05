@@ -185,3 +185,69 @@ body.light .card {
 .toast.show {
   transform: translateY(0);
 }
+
+/* =====================
+   PREMIUM UI ELEMENTS (Global)
+   ===================== */
+.premium-input {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  /* Very subtle light on dark */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  outline: none;
+  font-family: inherit;
+}
+
+.premium-input:focus {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.15);
+}
+
+.premium-label {
+  display: block;
+  font-size: 0.85rem;
+  color: #bbb;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-copy {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ccc;
+  padding: 10px 16px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.btn-copy:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-glow {
+  background: linear-gradient(135deg, #ff6b00 0%, #ff8800 100%);
+  box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3);
+  border: none;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.btn-glow:hover {
+  box-shadow: 0 6px 20px rgba(255, 107, 0, 0.5);
+  transform: translateY(-1px);
+}

@@ -71,27 +71,32 @@
             <div class="flex" style="flex-direction: column; gap: 24px;">
 
                 <!-- Create/Join Session -->
-                <div class="card">
+                <div class="card" style="border: 1px solid rgba(255,255,255,0.05);">
                     <h3>Session Controls</h3>
                     <p class="text-muted mb-4" style="font-size: 0.9rem;">Start a live class or join an existing one.
                     </p>
 
-                    <div class="form-group">
-                        <label>Your ID (Share this)</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="myPeerId" readonly value="Connecting..."
-                                style="font-family: monospace;">
-                            <button class="btn btn-secondary"
-                                onclick="navigator.clipboard.writeText(document.getElementById('myPeerId').value)">Copy</button>
+                    <div class="form-group mb-4">
+                        <label class="premium-label">Your ID</label>
+                        <div class="input-group">
+                            <input type="text" id="myPeerId" readonly value="Connecting..." class="premium-input"
+                                style="font-family: monospace; color: var(--secondary); font-weight: bold; letter-spacing: 1px; background: rgba(0,0,0,0.3);">
+                            <button class="btn btn-copy"
+                                onclick="navigator.clipboard.writeText(document.getElementById('myPeerId').value)">
+                                📋
+                            </button>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Join a Class (Enter Teacher ID)</label>
-                        <input type="text" id="remotePeerId" placeholder="e.g. teacher-uuid">
+                    <div class="form-group mb-4">
+                        <label class="premium-label">Join Class</label>
+                        <input type="text" id="remotePeerId" class="premium-input"
+                            placeholder="Enter Teacher ID code...">
                     </div>
 
-                    <button id="btnJoin" class="btn btn-primary" style="width: 100%;">Join Class</button>
+                    <button id="btnJoin" class="btn btn-primary btn-glow" style="width: 100%; padding: 14px;">
+                        Join Class Room
+                    </button>
                 </div>
 
                 <!-- AI Notes Preview -->

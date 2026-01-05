@@ -28,7 +28,7 @@
       <div class="flex justify-between items-center mb-4">
         <div>
           <h1>Explore Skills</h1>
-          <p style="color: var(--text-muted);">Discover, Learn, and Teach.</p>
+          <p style="color: var(--text-muted);">Discover new skills or find a tutor.</p>
         </div>
         <div class="card" style="padding: 10px 20px;">
           <span style="font-size: 0.9rem; color: var(--text-muted);">Your Credits:</span>
@@ -37,27 +37,32 @@
       </div>
 
       <!-- Search & Filter -->
-      <div class="card p-4">
-        <input type="text" id="searchInput" placeholder="🔍 Search by Skill, Tutor, or Outcome..."
-          style="width: 100%; padding: 12px; background: #262626; border: 1px solid #444; border-radius: 8px; color: white; font-size: 1rem; margin-bottom: 12px;">
+      <!-- Premium Search & Filter -->
+      <div class="search-wrapper mb-6">
+        <div class="search-group">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" class="premium-input" placeholder="Search skills, tutors, or outcomes...">
+        </div>
 
-        <div class="flex gap-2" style="overflow-x: auto; padding-bottom: 4px;" id="categoryFilters">
-          <button class="btn btn-sm btn-primary" data-cat="All">All</button>
-          <button class="btn btn-sm btn-secondary" data-cat="Technical">Technical</button>
-          <button class="btn btn-sm btn-secondary" data-cat="Communication">Communication</button>
-          <button class="btn btn-sm btn-secondary" data-cat="Art">Art</button>
-          <button class="btn btn-sm btn-secondary" data-cat="Music">Music</button>
-          <button class="btn btn-sm btn-secondary" data-cat="Business">Business</button>
-          <button class="btn btn-sm btn-secondary" data-cat="Language">Language</button>
-          <button class="btn btn-sm btn-secondary" data-cat="Health">Health</button>
-          <button class="btn btn-sm btn-secondary" data-cat="General">General</button>
+        <div class="select-group">
+          <select id="categorySelect" class="premium-select">
+            <option value="All">All Categories</option>
+            <option value="Technical">Technical</option>
+            <option value="Communication">Communication</option>
+            <option value="Art">Art & Design</option>
+            <option value="Music">Music</option>
+            <option value="Business">Business</option>
+            <option value="Language">Language</option>
+            <option value="Health">Health & Fitness</option>
+            <option value="General">General</option>
+          </select>
         </div>
       </div>
     </div>
 
     <!-- Skills Grid -->
     <div id="skillsContainer" class="grid grid-cols-3">
-      <!-- Dynamic Content -->
+      <!-- Dynamic Content only -->
       <p style="color: var(--text-muted);">Loading skills...</p>
     </div>
   </div>

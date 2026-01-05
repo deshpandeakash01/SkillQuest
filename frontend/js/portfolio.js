@@ -35,18 +35,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Load Profile
     try {
-        const res = await fetch("/api/profile/me", {
+        const res = await fetch("http://localhost:5000/api/profile/me", {
             headers: { "Authorization": `Bearer ${token}` }
         });
 
+        if (res.status === 401) throw new Error("Unauthorized");
         if (!res.ok) throw new Error("Failed to fetch profile");
 
         currentUserData = await res.json();
         renderProfile(currentUserData);
 
     } catch (err) {
-        console.error(err);
-        alert("Error loading profile");
+        console.error("Profile load error:", err);
+        if (err.message.includes("Unauthorized") || err.message.includes("401")) {
+            alert("Session expired. Please login again.");
+            localStorage.removeItem("token");
+            window.location.href = "login.html";
+        } else {
+            alert(`Error loading profile: ${err.message}`);
+        }
     }
 
     els.logoutBtn.addEventListener("click", () => {
@@ -113,7 +120,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!confirm("Remove current profile photo?")) return;
 
         try {
-            const res = await fetch("/api/protected/profile/picture", {
+            const res = await fetch("http://localhost:5000/api/protected/profile/picture", {
                 method: "DELETE",
                 headers: { "Authorization": `Bearer ${token}` }
             });
@@ -128,7 +135,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 els.initials.style.display = "block";
 
                 // Refresh data
-                const userDataRes = await fetch("/api/profile/me", { headers: { "Authorization": `Bearer ${token}` } });
+                const userDataRes = await fetch("http://localhost:5000/api/profile/me", { headers: { "Authorization": `Bearer ${token}` } });
                 currentUserData = await userDataRes.json();
             }
         } catch (err) {
@@ -146,7 +153,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             formData.append("image", els.picInput.files[0]);
 
             try {
-                await fetch("/api/protected/profile/picture", {
+                await fetch("http://localhost:5000/api/protected/profile/picture", {
                     method: "POST",
                     headers: { "Authorization": `Bearer ${token}` },
                     body: formData
@@ -170,7 +177,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
         try {
-            const res = await fetch("/api/protected/profile/update", {
+            const res = await fetch("http://localhost:5000/api/protected/profile/update", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -216,11 +223,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Social Links
         els.socialContainer.innerHTML = "";
         const links = user.socialLinks || {};
-        for (const [platform, url] of Object.entries(links)) {
-            // Check if map or object (mongoose map returns object in JSON usually)
-            // Handle if map was not converted 
-        }
-        // In fetch JSON, Mongoose Map becomes plain object { github: "url", ...}
+
         for (const key in links) {
             if (links[key]) {
                 const a = document.createElement("a");
@@ -230,7 +233,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 a.style.fontSize = "1.5rem";
                 a.title = key;
 
-                // Icons mappings (simple chars or FontAwesome if installed, using Emoji for now/Icons)
+                // Icons mappings
                 let icon = "🔗";
                 if (key === "github") icon = "💻";
                 if (key === "linkedin") icon = "👔";
@@ -256,22 +259,26 @@ document.addEventListener("DOMContentLoaded", async () => {
         els.learningCount.textContent = user.skillsLearning?.length || 0;
 
         // Lists
-        if (user.skillsTeach.length > 0) {
+        if (user.skillsTeach && user.skillsTeach.length > 0) {
             els.teachingList.innerHTML = user.skillsTeach.map(skillName => `
         <div style="padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
           <span style="font-weight: 500;">${skillName}</span>
           <span class="badge badge-primary">Teacher</span>
         </div>
       `).join("");
+        } else {
+            els.teachingList.innerHTML = "<p style='color: #666;'>No skills teaching yet.</p>";
         }
 
-        if (user.skillsLearning.length > 0) {
+        if (user.skillsLearning && user.skillsLearning.length > 0) {
             els.learningList.innerHTML = user.skillsLearning.map(skillName => `
         <div style="padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
           <span>${skillName}</span>
           <span class="badge badge-green">In Progress</span>
         </div>
       `).join("");
+        } else {
+            els.learningList.innerHTML = "<p style='color: #666;'>No skills learning yet.</p>";
         }
     }
 });

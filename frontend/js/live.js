@@ -31,7 +31,18 @@ let isRecording = false;
 
 // Token
 const token = localStorage.getItem("token");
-if (!token) window.location.href = "login.html";
+if (!token) {
+    window.location.href = "login.html";
+} else {
+    // Verify token validity quickly
+    fetch("http://localhost:5000/api/profile/me", { headers: { "Authorization": `Bearer ${token}` } })
+        .then(res => {
+            if (res.status === 401) {
+                localStorage.removeItem("token");
+                window.location.href = "login.html";
+            }
+        });
+}
 
 /* ===========================
    INIT

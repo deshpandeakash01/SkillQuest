@@ -236,7 +236,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    const res = await fetch("/api/profile/me", {
+    const res = await fetch("http://localhost:5000/api/profile/me", {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -269,7 +269,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Fetch detailed skills map to get IDs and Quiz IDs
     let allSkillsMap = {};
     try {
-      const skillRes = await fetch("/api/skills", { headers: { Authorization: `Bearer ${token}` } });
+      const skillRes = await fetch("http://localhost:5000/api/skills", { headers: { Authorization: `Bearer ${token}` } });
       const skillsData = await skillRes.json();
       skillsData.forEach(s => allSkillsMap[s.name] = s);
     } catch (e) { console.error("Failed to load skills map"); }
@@ -308,7 +308,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       currentSkillName = skillName;
 
       try {
-        const res = await fetch(`/api/protected/quiz/${skill.quizId}`, {
+        const res = await fetch(`http://localhost:5000/api/protected/quiz/${skill.quizId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const quiz = await res.json();
@@ -377,7 +377,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       try {
-        const res = await fetch(`/api/protected/quiz/${currentQuizId}/submit`, {
+        const res = await fetch(`http://localhost:5000/api/protected/quiz/${currentQuizId}/submit`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -438,7 +438,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     window.claimCertificate = async (skillName) => {
       try {
-        const res = await fetch("/api/protected/certificate/issue", {
+        const res = await fetch("http://localhost:5000/api/protected/certificate/issue", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -473,7 +473,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
           try {
             const token = localStorage.getItem("token");
-            const res = await fetch("/api/profile", {
+            const res = await fetch("http://localhost:5000/api/profile", {
               method: "DELETE",
               headers: { Authorization: `Bearer ${token}` }
             });
@@ -495,7 +495,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   } catch (err) {
     console.error("PROFILE FETCH FAILED:", err);
-    alert("Profile API failed — check console");
+    if (err.message === "Unauthorized") {
+      alert("Session expired. Please login again.");
+      localStorage.removeItem("token");
+      window.location.href = "login.html";
+    } else {
+      alert(`Profile API failed: ${err.message}`);
+    }
   }
 });
 

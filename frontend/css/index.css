@@ -1,44 +1,140 @@
 /* =====================
-   HERO SECTION
+   HERO SECTION (Premium & Minimalist)
    ===================== */
 #hero {
-  height: 80vh;
+  height: 100vh;
+  /* Full screen */
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
-  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://source.unsplash.com/random/1600x900/?technology,code');
+  /* Dark overlay + Local Asset Background */
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.95)),
+    url('../img/bg-connect.jpg');
   background-size: cover;
   background-position: center;
+  background-attachment: fixed;
+  /* Parallax effect */
   color: white;
+  position: relative;
+  overflow: hidden;
 }
 
+/* Subtle glow behind text */
+#hero::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(circle, rgba(255, 107, 0, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  padding: 20px;
+}
+
+/* Premium Gradient Typography */
 #hero h2 {
-  font-size: 3rem;
+  font-size: 3.5rem;
+  font-weight: 800;
   margin-bottom: 1rem;
+  line-height: 1.2;
+  background: linear-gradient(135deg, #fff 30%, var(--primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -1px;
 }
 
 #hero p {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
+  font-size: 1.25rem;
+  margin-bottom: 2.5rem;
+  color: #ccc;
+  font-weight: 300;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Hero Button - Minimal & Glowing */
+#hero-cta-btn {
+  padding: 14px 40px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: var(--primary);
+  border-radius: 50px;
+  /* Pill shape */
+  box-shadow: 0 0 20px rgba(255, 107, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+#hero-cta-btn:hover {
+  box-shadow: 0 0 30px rgba(255, 107, 0, 0.6);
+  transform: scale(1.05);
 }
 
 /* =====================
-   OVERVIEW SECTION
+   FEATURES SECTION (Dark & Glassmorphic)
    ===================== */
 .content-section {
-  padding: 4rem 2rem;
+  padding: 6rem 2rem;
   text-align: center;
+  /* Deep dark background matching the end of hero gradient */
+  background: #0a0a0a;
 }
 
+.content-section h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(to right, #fff, #999);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Override .card for Index Page only -> Glassmorphism */
 .cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
-  margin-top: 2rem;
+  margin-top: 4rem;
 }
 
-.card h3 {
+.cards .card {
+  background: rgba(255, 255, 255, 0.03);
+  /* Ultra subtle */
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 2.5rem 2rem;
+  border-radius: 20px;
+  transition: all 0.4s ease;
+  box-shadow: none;
+  /* Minimalist default */
+}
+
+.cards .card:hover {
+  transform: translateY(-10px);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.cards .card h3 {
+  font-size: 1.4rem;
   margin-bottom: 1rem;
-  color: #ff6b00;
+  color: white;
+  font-weight: 600;
+}
+
+.cards .card p {
+  font-size: 0.95rem;
+  color: #888;
+  line-height: 1.6;
 }
