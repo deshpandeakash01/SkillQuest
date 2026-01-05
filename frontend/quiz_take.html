@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Take Quiz - SkillQuest</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .quiz-container {
+            max-width: 800px;
+            margin: 2rem auto;
+        }
+
+        .question-card {
+            background: #1f1f1f;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        body.light .question-card {
+            background: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .option-label {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            background: #333;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        body.light .option-label {
+            background: #f0f0f0;
+        }
+
+        .option-label:hover {
+            background: #444;
+        }
+
+        body.light .option-label:hover {
+            background: #e0e0e0;
+        }
+
+        .option-input {
+            margin-right: 10px;
+        }
+
+        .result-box {
+            padding: 20px;
+            background: #28a745;
+            color: white;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="logo">SkillQuest</a>
+        <div class="nav-links">
+            <a href="live.html">Back to Class</a>
+        </div>
+    </nav>
+
+    <div class="container quiz-container">
+        <h1 id="quizTitle">Loading Quiz...</h1>
+        <p class="text-muted" id="quizMeta"></p>
+
+        <div id="resultBox" class="result-box">
+            <h2>Score: <span id="scoreVal"></span></h2>
+            <p>Great job completing the assessment!</p>
+        </div>
+
+        <form id="quizForm">
+            <div id="questionsContainer"></div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Submit Answers</button>
+        </form>
+    </div>
+
+    <script src="js/quiz_take.js"></script>
+</body>
+
+</html>

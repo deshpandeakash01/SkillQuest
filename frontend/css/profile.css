@@ -1,0 +1,165 @@
+/* .profile-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  text-align: left;
+}
+
+.profile-details, .profile-section {
+  background: #1f1f1f;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+body.light .profile-details, body.light .profile-section {
+  background: white;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.skill-list {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px dashed #444;
+  border-radius: 5px;
+}
+
+body.light .skill-list {
+  border: 1px dashed #ccc;
+}
+
+.skill-tag {
+  display: inline-block;
+  background: #ff6b00;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  margin: 0.5rem 0.5rem 0 0;
+  font-size: 0.9rem;
+}
+
+.secondary-cta-btn {
+  background: #444;
+}
+
+.secondary-cta-btn:hover {
+  background: #555;
+} */
+
+
+
+
+
+.profile-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  text-align: left;
+}
+
+/* Base card */
+.profile-details,
+.profile-section {
+  background: #1f1f1f;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+body.light .profile-details,
+body.light .profile-section {
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* =====================
+   CREDIT DASHBOARD
+   ===================== */
+.credits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.credit-box {
+  background: #2a2a2a;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+body.light .credit-box {
+  background: #f2f2f2;
+}
+
+.credit-label {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin-bottom: 0.3rem;
+}
+
+.credit-value {
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+/* =====================
+   SKILLS
+   ===================== */
+.skill-list {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px dashed #444;
+  border-radius: 5px;
+  min-height: 50px;
+}
+
+body.light .skill-list {
+  border: 1px dashed #ccc;
+}
+
+.skill-tag {
+  display: inline-block;
+  background: #ff6b00;
+  color: #ffffff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  margin: 0.5rem 0.5rem 0 0;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+/* =====================
+   ACTIVITY
+   ===================== */
+.activity-list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 1rem;
+}
+
+.activity-list li {
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #333;
+  font-size: 0.95rem;
+}
+
+body.light .activity-list li {
+  border-bottom: 1px solid #ddd;
+}
+
+.activity-list li:last-child {
+  border-bottom: none;
+}
+
+/* =====================
+   BUTTON VARIANT
+   ===================== */
+.secondary-cta-btn {
+  background: #444;
+}
+
+.secondary-cta-btn:hover {
+  background: #555;
+}

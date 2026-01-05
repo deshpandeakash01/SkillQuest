@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile | SkillQuest</title>
+
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/profile.css">
+</head>
+
+<body>
+  <div class="parallax-bg"></div>
+
+  <header>
+    <nav class="navbar">
+      <a href="index.html" class="logo-link">
+        <h1 class="logo">SkillQuest</h1>
+      </a>
+      <ul class="nav-links"></ul>
+      <button id="themeToggle" class="theme-btn">☀️</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="content-section profile-container">
+
+      <!-- Identity -->
+      <section class="profile-section">
+        <h2 id="welcome-message">Loading...</h2>
+        <p><strong>Email:</strong> <span id="profile-email"></span></p>
+      </section>
+
+      <!-- Credit Dashboard -->
+      <section class="profile-section">
+        <h3>Credit Overview</h3>
+        <div class="credits-grid">
+          <div class="credit-box">
+            <p class="credit-label">Available</p>
+            <p class="credit-value" id="credits-available">0</p>
+          </div>
+          <div class="credit-box">
+            <p class="credit-label">Earned</p>
+            <p class="credit-value" id="credits-earned">0</p>
+          </div>
+          <div class="credit-box">
+            <p class="credit-label">Spent</p>
+            <p class="credit-value" id="credits-spent">0</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Skills I Teach -->
+      <section class="profile-section">
+        <h3>Skills I Teach</h3>
+        <div id="user-teaching" class="skill-list">
+          <p>Loading...</p>
+        </div>
+      </section>
+
+      <!-- Skills I Am Learning -->
+      <section class="profile-section">
+        <h3>Skills I Am Learning</h3>
+        <div id="user-learning" class="skill-list">
+          <p>Loading...</p>
+        </div>
+      </section>
+
+      <!-- Skills I Am Interested In -->
+      <section class="profile-section">
+        <h3>Skills I Am Interested In</h3>
+        <div id="user-interests" class="skill-list">
+          <p>Loading...</p>
+        </div>
+      </section>
+
+      <!-- Activity -->
+      <section class="profile-section">
+        <h3>Recent Activity</h3>
+        <ul id="user-activity" class="activity-list">
+          <li>Loading activity...</li>
+        </ul>
+      </section>
+
+      <!-- Danger Zone -->
+      <section class="profile-section" style="border: 1px solid var(--danger); margin-top: 40px;">
+        <h3 style="color: var(--danger);">Danger Zone</h3>
+        <p style="margin-bottom: 20px; color: var(--text-muted);">
+          Once you delete your account, there is no going back. Please be certain.
+        </p>
+        <button id="delete-account-btn" class="btn btn-danger">Delete Account</button>
+      </section>
+
+    </section>
+  </main>
+
+  <!-- Quiz Modal -->
+  <div id="quizModal" class="modal" style="display: none;">
+    <div class="modal-content card" style="max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
+      <span class="close-modal" onclick="closeQuizModal()"
+        style="float: right; cursor: pointer; font-size: 1.5rem;">&times;</span>
+      <h2 id="quizTitle">Quiz</h2>
+      <div id="quizQuestions"></div>
+      <div id="quizResult" style="display: none; text-align: center; margin-top: 20px;"></div>
+      <button id="submitQuizBtn" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Submit Answers</button>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2025 SkillQuest. Empowering skill exchange worldwide.</p>
+  </footer>
+
+  <script src="js/theme.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/profile.js"></script>
+</body>
+
+</html>
