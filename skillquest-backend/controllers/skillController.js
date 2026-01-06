@@ -284,6 +284,10 @@ exports.publishSkill = async (req, res) => {
       quizDifficulty, quizNumQuestions
     } = req.body;
 
+    console.log("Debug: Received publish request");
+    console.log("Body:", req.body);
+    console.log("File:", req.file);
+
     // Video handling
     let videoUrl = "";
     if (req.file) {
@@ -329,8 +333,15 @@ exports.publishSkill = async (req, res) => {
     // Auto-add to teacher's teaching list
     if (!user.skillsTeach.includes(newSkill.name)) {
       user.skillsTeach.push(newSkill.name);
-      await user.save();
     }
+
+    // REWARD: Award credits for publishing
+    const PUBLISH_REWARD = 5;
+    user.credits.available += PUBLISH_REWARD;
+    user.credits.earned += PUBLISH_REWARD;
+    user.activity.push(`Earned ${PUBLISH_REWARD} credits for publishing ${newSkill.name}`);
+
+    await user.save();
 
     res.json({
       msg: "Skill published and AI Quiz generated!",

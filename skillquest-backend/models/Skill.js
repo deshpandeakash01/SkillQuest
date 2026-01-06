@@ -22,7 +22,7 @@ const skillSchema = new mongoose.Schema(
     category: {
       type: String,
       default: "General",
-      enum: ["Technical", "Music", "Art", "Business", "Language", "Health", "General"]
+      enum: ["Technical", "Communication", "Music", "Art", "Business", "Language", "Health", "General"]
     },
 
     videoUrl: {

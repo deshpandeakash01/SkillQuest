@@ -93,47 +93,72 @@ function renderSkills(skills) {
 
   skills.forEach((skill) => {
     const card = document.createElement("div");
-    card.className = "card";
+    card.className = "skill-card"; // New class
 
-    // Status Logic
+    // Status Badge Logic
     let statusBadge = "";
     let actionBtn = "";
 
+    // -- ACTION LOGIC --
     if (skill.isTeaching) {
-      statusBadge = `<span class="badge badge-primary">You Teach This</span>`;
-      // Show Video for Teacher
+      statusBadge = `<span class="badge badge-primary" style="font-size: 0.75rem;">You Teach This</span>`;
+      actionBtn = `<button class="btn btn-secondary w-full" disabled>Active Teacher</button>`;
+    } else if (skill.isEnrolled) {
+      statusBadge = `<span class="badge badge-success" style="font-size: 0.75rem;">Enrolled</span>`;
+      if (skill.isCompleted) {
+        actionBtn = `<button class="btn btn-secondary w-full" disabled>Completed</button>`;
+      } else {
+        actionBtn = `<button class="btn btn-primary w-full" onclick="completeSkill('${skill._id}', '${skill.tutor}')">Mark Complete</button>`;
+      }
+    } else {
+      // Not enrolled, not teaching
+      actionBtn = `<button class="btn btn-glow w-full" onclick="enrollSkill('${skill._id}')">Enroll Now</button>`;
+
+      // If user created it but isn't marked as 'teaching' (edge case, but handled)
+      if (currentUser && skill.tutor === currentUser._id) {
+        actionBtn = `<button class="btn btn-secondary w-full" disabled>Your Skill</button>`;
+      }
     }
 
-    // Always show video if it exists (Filtered by hasVideo, so it should exist)
-    const videoPlayer = skill.videoUrl ? `
-        <div style="margin-bottom: 12px; border-radius: 8px; overflow: hidden; background: #000;">
-            <video src="${skill.videoUrl}" controls preload="metadata" style="width: 100%; aspect-ratio: 16/9; display: block;"></video>
-        </div>` : "";
+
+    // Video Section (Always show if exists, using placeholder if null for layout consistency)
+    const videoSrc = skill.videoUrl || "";
+    const videoHTML = videoSrc ?
+      `<video src="${videoSrc}" controls preload="metadata"></video>` :
+      `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#333; color:#555;">No Preview</div>`;
 
     card.innerHTML = `
-      <div class="flex justify-between items-start mb-2">
-        <div>
-            <h3 style="font-size: 1.25rem; margin-bottom: 4px;">${skill.name}</h3>
-            <span style="font-size: 0.8rem; color: var(--secondary);">by ${skill.tutorName || "Unknown"}</span>
+      <!-- Media Area -->
+      <div class="skill-media">
+        ${videoHTML}
+        <div style="position: absolute; top: 10px; right: 10px;">
+            <span class="badge badge-purple" style="backdrop-filter: blur(4px); background: rgba(138, 43, 226, 0.6);">${skill.category || "General"}</span>
+            ${statusBadge}
         </div>
-        ${statusBadge}
       </div>
-      
-      ${videoPlayer}
 
-      <div style="margin-bottom: 1rem;">
-        <p style="font-size: 0.9rem; font-weight: bold; color: #ccc; margin-bottom: 4px;">Outcome:</p>
-        <p style="color: var(--text-muted); font-size: 0.9rem; min-height: 40px;">
-            ${skill.outcome || skill.description || "No outcome specified."}
+      <!-- Content Body -->
+      <div class="skill-content">
+        <div class="skill-header">
+            <h3 class="skill-title">${skill.name}</h3>
+        </div>
+        
+        <span class="skill-tutor">by ${skill.tutorName || "Unknown Tutor"}</span>
+        
+        <p class="skill-desc">
+            ${skill.outcome || skill.description || "Unlock this skill to expand your capabilities."}
         </p>
       </div>
-      
-      <div class="flex justify-between items-center mb-4" style="font-size: 0.9rem;">
-        <span class="badge badge-purple">${skill.category || "General"}</span>
-        <span style="color: var(--secondary); font-weight: bold;">${skill.creditCost} Credits</span>
-      </div>
 
-      <div>${actionBtn}</div>
+      <!-- Footer & Actions -->
+      <div class="skill-footer">
+        <div class="skill-price">
+            <span>💎</span> ${skill.creditCost}
+        </div>
+        <div style="flex: 1; padding-left: 1rem;">
+             ${actionBtn}
+        </div>
+      </div>
     `;
 
     container.appendChild(card);

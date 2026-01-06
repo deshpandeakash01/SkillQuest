@@ -53,13 +53,17 @@ window.publishSkill = async function () {
     const token = localStorage.getItem("token"); // ensure token is available
 
     try {
+        console.log("Debug: Sending publish request...");
         const res = await fetch("http://localhost:5000/api/protected/skills/publish", {
             method: "POST",
             headers: { "Authorization": `Bearer ${token}` },
             body: formData
         });
 
+        console.log("Debug: Response status:", res.status);
         const data = await res.json();
+        console.log("Debug: Response data:", data);
+
         if (progress) progress.style.width = "100%";
 
         if (res.ok) {
@@ -71,10 +75,11 @@ window.publishSkill = async function () {
             const oIn = document.getElementById("skillOutcomeInput"); if (oIn) oIn.value = "";
             if (fileInput) fileInput.value = "";
         } else {
-            alert("Publish Failed: " + data.msg);
+            console.error("Publish failed:", data);
+            alert("Publish Failed: " + (data.msg || "Unknown error"));
         }
     } catch (err) {
-        console.error(err);
+        console.error("Fetch error:", err);
         alert("Error publishing skill: " + err.message);
     }
 };
@@ -101,6 +106,16 @@ if (!document.getElementById("btnConfirmPublish")) {
 }
 
 const btnConfirmPublish = document.getElementById("btnConfirmPublish");
+if (btnConfirmPublish) {
+    console.log("Debug: Attaching click listener to btnConfirmPublish");
+    btnConfirmPublish.addEventListener("click", (e) => {
+        // e.preventDefault();
+        console.log("Debug: Publish button clicked via listener");
+        publishSkill();
+    });
+} else {
+    console.error("Critical: btnConfirmPublish not found!");
+}
 
 // AI Notes
 const aiNotesPlaceholder = document.getElementById("aiNotesPlaceholder");
@@ -138,12 +153,25 @@ async function init() {
         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         localVideo.srcObject = localStream;
 
-        // Init Peer
-        peer = new Peer();
+        // Init Peer (Local Server)
+        console.log("Debug: Initializing PeerJS with Local Server at " + window.location.hostname + ":" + window.location.port);
+        peer = new Peer(undefined, {
+            host: window.location.hostname,
+            port: window.location.port || 5000,
+            path: "/peerjs",
+            debug: 3 // Detailed logging
+        });
 
         peer.on("open", (id) => {
+            console.log("PeerJS Connected with ID:", id);
             myPeerIdInput.value = id;
             updateStatus("Online - Waiting for connection");
+        });
+
+        peer.on("error", (err) => {
+            console.error("PeerJS Error:", err);
+            updateStatus("Offline - Error: " + err.type);
+            alert("PeerJS Error: " + err.type + "\nCompontents dependent on live connection may fail.");
         });
 
         // Answer call
@@ -225,7 +253,9 @@ function handleStream(call) {
 }
 
 function updateStatus(msg) {
-    document.getElementById("statusBadge").textContent = msg;
+    console.log("Status Update:", msg);
+    const badge = document.getElementById("statusBadge");
+    if (badge) badge.textContent = msg;
 }
 
 /* ===========================

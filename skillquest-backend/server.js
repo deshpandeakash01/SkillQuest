@@ -21,7 +21,9 @@ const PORT = process.env.PORT || 5000;
 connectDB(process.env.MONGODB_URI);
 
 // middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false,
+}));
 app.use(cors());
 app.use(express.json());
 
@@ -50,6 +52,38 @@ app.use((req, res, next) => {
 
 // Serve static files from the frontend folder
 app.use(express.static(path.join(__dirname, "../frontend")));
+
+const { ExpressPeerServer } = require("peer");
+// Note: We need the server instance, but app is not listening yet.
+// However, ExpressPeerServer documentation usually says it needs the http server.
+// BUT, if we use app.use('/peerjs', ...), it handles the HTTP/WS requests.
+// We can't initialize peerServer with 'server' before 'server' exists.
+// CRITICAL: We changed to 'const server = app.listen()' at the bottom.
+// We can't move 'peerServer = ExpressPeerServer(server)' up because 'server' is undefined there.
+// SOLUTION: We must keep app.listen at the bottom, but we can define the middleware.
+// WAIT. ExpressPeerServer(server) REQUIRES the http server instance.
+// If we move app.use up, peerServer needs to be defined.
+// If peerServer needs server, server must be defined.
+// This is a circular dependency in the linear script if we want app.use() early.
+//
+// CORRECT PATTERN for Express + PeerJS:
+// 1. Create http server from app explicitly: const server = require('http').createServer(app);
+// 2. app.use(...)
+// 3. custom routes
+// 4. server.listen(...)
+//
+// Let's refactor to that standard pattern.
+
+const http = require("http");
+const server = http.createServer(app);
+
+const peerServer = ExpressPeerServer(server, {
+  debug: true
+});
+app.use("/peerjs", peerServer);
+
+// Serve static files from the frontend folder
+app.use(express.static(path.join(__dirname, "../frontend")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Handle SPA routing or fallback (optional, but good for safety)
@@ -75,6 +109,8 @@ app.get("/api/test-auth", authMiddleware, (req, res) => {
 
 
 // start server (LAST)
-app.listen(PORT, () =>
+server.listen(PORT, () =>
   console.log(`Server running on port ${PORT}`)
 );
+
+
