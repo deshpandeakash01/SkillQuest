@@ -2,6 +2,10 @@
    LIVE STREAM & RECORDING LOGIC
    ========================================= */
 
+
+// DEBUG: Verifying script load
+alert("Debug: Live.js Script Loaded");
+
 const myPeerIdInput = document.getElementById("myPeerId");
 const remotePeerIdInput = document.getElementById("remotePeerId");
 const localVideo = document.getElementById("localVideo");
