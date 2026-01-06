@@ -2,9 +2,82 @@
    LIVE STREAM & RECORDING LOGIC
    ========================================= */
 
+// GLOBAL ERROR HANDLER
+window.onerror = function (msg, url, line, col, error) {
+    alert("JS Error: " + msg + "\nLine: " + line);
+    return false;
+};
 
 // DEBUG: Verifying script load
 alert("Debug: Live.js Script Loaded");
+
+// GLOBAL PUBLISH HANDLER (Moved to top to ensure definition)
+window.publishSkill = async function () {
+    alert("Debug: Handle Publish Triggered!"); // Checking if click reaches here
+    console.log("Handle Publish triggered");
+
+    const titleVal = document.getElementById("skillTitleInput")?.value;
+    const categoryVal = document.getElementById("skillCategoryInput")?.value;
+    const outcomeVal = document.getElementById("skillOutcomeInput")?.value;
+    const fileInput = document.getElementById("videoFileInput");
+    const file = fileInput?.files[0];
+
+    // Alert values to debug reading
+    // alert(`Debug Values: Title=${titleVal}, File=${file ? file.name : 'None'}`);
+
+    if (!titleVal || !outcomeVal || !file) {
+        return alert("Please fill all fields and select a video.");
+    }
+
+    const modal = document.getElementById("uploadModal");
+    const progress = document.getElementById("uploadProgress");
+    const progressContainer = document.getElementById("progressContainer");
+
+    if (progressContainer) {
+        progressContainer.style.display = "block";
+        if (progress) progress.style.width = "30%";
+    }
+
+    const quizDiff = document.getElementById("quizDifficultyInput")?.value;
+    const quizNum = document.getElementById("quizNumInput")?.value;
+
+    const formData = new FormData();
+    formData.append("name", titleVal);
+    formData.append("category", categoryVal);
+    formData.append("outcome", outcomeVal);
+    formData.append("creditCost", 5);
+    formData.append("quizDifficulty", quizDiff);
+    formData.append("quizNumQuestions", quizNum);
+    formData.append("video", file);
+
+    const token = localStorage.getItem("token"); // ensure token is available
+
+    try {
+        const res = await fetch("http://localhost:5000/api/protected/skills/publish", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${token}` },
+            body: formData
+        });
+
+        const data = await res.json();
+        if (progress) progress.style.width = "100%";
+
+        if (res.ok) {
+            alert("Skill Published Successfully!");
+            if (modal) modal.style.display = "none";
+
+            // Clean up
+            const tIn = document.getElementById("skillTitleInput"); if (tIn) tIn.value = "";
+            const oIn = document.getElementById("skillOutcomeInput"); if (oIn) oIn.value = "";
+            if (fileInput) fileInput.value = "";
+        } else {
+            alert("Publish Failed: " + data.msg);
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Error publishing skill: " + err.message);
+    }
+};
 
 const myPeerIdInput = document.getElementById("myPeerId");
 const remotePeerIdInput = document.getElementById("remotePeerId");
@@ -19,6 +92,15 @@ const btnStartRecord = document.getElementById("btnStartRecord");
 const btnStopRecord = document.getElementById("btnStopRecord");
 const btnUploadVideo = document.getElementById("btnUploadVideo");
 const videoUploadInput = document.getElementById("videoUploadInput");
+
+// DEBUG: Check for elements
+if (!document.getElementById("btnConfirmPublish")) {
+    alert("CRITICAL DEBUG: 'btnConfirmPublish' not found in DOM!");
+} else {
+    console.log("Debug: btnConfirmPublish found");
+}
+
+const btnConfirmPublish = document.getElementById("btnConfirmPublish");
 
 // AI Notes
 const aiNotesPlaceholder = document.getElementById("aiNotesPlaceholder");
@@ -242,67 +324,10 @@ async function uploadRecording() {
     uploadFile(file);
 }
 
-// New Publish Logic
-const btnConfirmPublish = document.getElementById("btnConfirmPublish");
+// Deprecated or moved up
+// const btnConfirmPublish = document.getElementById("btnConfirmPublish");
 
-btnConfirmPublish.addEventListener("click", async () => {
-    const title = document.getElementById("skillTitleInput").value;
-    const category = document.getElementById("skillCategoryInput").value;
-    const outcome = document.getElementById("skillOutcomeInput").value;
-    const fileInput = document.getElementById("videoFileInput");
-    const file = fileInput.files[0];
-
-    if (!title || !outcome || !file) {
-        return alert("Please fill all fields and select a video.");
-    }
-
-    const modal = document.getElementById("uploadModal");
-    const progress = document.getElementById("uploadProgress");
-    const progressContainer = document.getElementById("progressContainer");
-
-    alert(`Debug: Details - Title: ${title}, Outcome: ${outcome}, File: ${file ? file.name : "None"}`);
-
-    progressContainer.style.display = "block";
-    progress.style.width = "30%";
-
-    const quizDiff = document.getElementById("quizDifficultyInput").value;
-    const quizNum = document.getElementById("quizNumInput").value;
-
-    const formData = new FormData();
-    formData.append("name", title);
-    formData.append("category", category);
-    formData.append("outcome", outcome);
-    formData.append("creditCost", 5); // Default
-    formData.append("quizDifficulty", quizDiff);
-    formData.append("quizNumQuestions", quizNum);
-    formData.append("video", file);
-
-    try {
-        const res = await fetch("http://localhost:5000/api/protected/skills/publish", {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${token}` },
-            body: formData
-        });
-
-        const data = await res.json();
-        progress.style.width = "100%";
-
-        if (res.ok) {
-            alert("Skill Published Successfully!");
-            modal.style.display = "none";
-            // Clean up
-            document.getElementById("skillTitleInput").value = "";
-            document.getElementById("skillOutcomeInput").value = "";
-            fileInput.value = "";
-            // Maybe show AI notes if backend generated them, but for now we focus on Publish
-        } else {
-            alert("Publish Failed: " + data.msg);
-        }
-    } catch (err) {
-        console.error(err);
-        alert("Error publishing skill");
-    }
-});
+// Deprecated duplicate removed
 
 // Deprecated old Upload logic hooks (can keep for compatibility or remove)
 // Leaving empty to prevent errors if invoked
@@ -428,4 +453,9 @@ function stopTimer() {
 }
 
 // Start
-init();
+if (typeof Peer === 'undefined') {
+    console.error("PeerJS not loaded. Check internet connection.");
+    alert("Warning: PeerJS library failed to load. Live features will not work. Check your internet.");
+} else {
+    init().catch(err => console.error("Init failed:", err));
+}
