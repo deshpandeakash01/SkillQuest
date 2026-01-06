@@ -303,7 +303,72 @@ btnConfirmPublish.addEventListener("click", async () => {
 async function uploadRecording() {
     alert("Please save recording locally and publish via 'Publish/Upload' button.");
 }
-async function uploadFile(file) { }
+async function uploadFile(file) {
+    if (!file) return;
+
+    // Show Progress
+    const placeholder = document.getElementById("aiNotesPlaceholder");
+    placeholder.innerHTML = `
+        <div style="text-align: center; width: 100%;">
+            <div class="loader" style="margin: 0 auto 15px;"></div>
+            <h4 style="color: var(--secondary); margin-bottom: 5px;">Uploading & analyzing...</h4>
+            <p style="color: #666; font-size: 0.9rem;">Please wait while our AI processes your video.</p>
+        </div>
+        <style>
+            .loader {
+                border: 4px solid #333;
+                border-top: 4px solid var(--primary);
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                animation: spin 1s linear infinite;
+            }
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        </style>
+    `;
+
+    const formData = new FormData();
+    formData.append("video", file);
+
+    try {
+        // 1. Upload
+        const uploadRes = await fetch("http://localhost:5000/api/protected/video/upload", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${token}` },
+            body: formData
+        });
+        const uploadData = await uploadRes.json();
+
+        if (!uploadRes.ok) throw new Error(uploadData.msg || "Upload failed");
+
+        // 2. Generate Notes
+        const notesRes = await fetch("http://localhost:5000/api/protected/video/notes", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ filename: uploadData.filename })
+        });
+        const notesData = await notesRes.json();
+
+        if (!notesRes.ok) throw new Error(notesData.msg || "Notes generation failed");
+
+        // 3. Display
+        displayAiNotes(notesData.downloadUrl);
+
+    } catch (err) {
+        console.error(err);
+        placeholder.innerHTML = `
+            <div style="text-align: center; color: var(--error);">
+                <div style="font-size: 2rem; margin-bottom: 10px;">❌</div>
+                <h4>Process Failed</h4>
+                <p>${err.message}</p>
+                <button onclick="location.reload()" class="btn btn-secondary" style="margin-top: 10px;">Try Again</button>
+            </div>
+        `;
+    }
+}
 
 
 function displayAiNotes(url) {
