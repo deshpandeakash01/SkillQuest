@@ -29,7 +29,7 @@ exports.generateQuiz = async (topic, baseDifficulty, numQuestions) => {
         const randId = Math.floor(Math.random() * 1000);
 
         questions.push({
-            _id: randId, // Mock ID for tracking
+            // _id: randId, // Removed to avoid CastError (Mongoose expects ObjectId)
             questionText: `[Attempt: ${currentDiff}] What represents the ${randDesc} ${randConcept} in ${topic}?`,
             options: [
                 `The correct answer for ${randConcept}`,

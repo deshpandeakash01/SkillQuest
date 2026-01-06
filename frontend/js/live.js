@@ -256,6 +256,8 @@ btnConfirmPublish.addEventListener("click", async () => {
     const progress = document.getElementById("uploadProgress");
     const progressContainer = document.getElementById("progressContainer");
 
+    alert(`Debug: Details - Title: ${title}, Outcome: ${outcome}, File: ${file ? file.name : "None"}`);
+
     progressContainer.style.display = "block";
     progress.style.width = "30%";
 
