@@ -19,25 +19,44 @@ exports.generateQuiz = async (topic, baseDifficulty, numQuestions) => {
 
     const currentDiff = baseDifficulty;
 
-    const descriptors = ["Key", "Hidden", "Core", "Abstract", "Fundamental", "Complex"];
-    const concepts = ["Pattern", "Syntax", "Function", "Module", "Architecture", "Logic"];
+    // Generate semi-realistic questions based on topic
+    // Simple mock logic to make it look like "AI"
+    const topicWords = topic.split(" ");
+    const mainTopic = topicWords[0] || "General";
+
+    // Templates for various types of questions
+    const questionTemplates = [
+        "What is the primary function of {topic} in modern development?",
+        "Which of the following best describes the core concept of {topic}?",
+        "When implementing {topic}, what is the most critical factor to consider?",
+        "In the context of {topic}, what does the term '{concept}' refer to?",
+        "How does {topic} handle async operations compared to traditional methods?",
+        "What is a common pitfall when working with {topic} for beginners?"
+    ];
+
+    // Dynamic 'concepts' based on topic to make it look real
+    const concepts = ["Abstraction", "Latency", "Encapsulation", "State Management", "Recursion", "Scalability", "Syntax", "Compilation"];
 
     for (let i = 1; i <= numQuestions; i++) {
-        // Randomize content to simulate "New Questions each time"
-        const randDesc = descriptors[Math.floor(Math.random() * descriptors.length)];
-        const randConcept = concepts[Math.floor(Math.random() * concepts.length)];
-        const randId = Math.floor(Math.random() * 1000);
+        // Pick a random template
+        const tpl = questionTemplates[Math.floor(Math.random() * questionTemplates.length)];
+        const concept = concepts[Math.floor(Math.random() * concepts.length)];
+
+        // Construct question text
+        let qText = tpl.replace("{topic}", mainTopic).replace("{concept}", concept);
+
+        // Add difficulty marker (User likes to see attempts/difficulty)
+        qText = `[${currentDiff} Level] ${qText}`;
 
         questions.push({
-            // _id: randId, // Removed to avoid CastError (Mongoose expects ObjectId)
-            questionText: `[Attempt: ${currentDiff}] What represents the ${randDesc} ${randConcept} in ${topic}?`,
+            questionText: qText,
             options: [
-                `The correct answer for ${randConcept}`,
-                `A misleading distractor`,
-                `Completely wrong option`,
-                `Another wrong choice`
+                `The standard approach defined by ${mainTopic} documentation`, // Correct-ish sounding
+                `A deprecated method that is no longer used`, // Distractor
+                `An unrelated concept from a different language`, // Wrong
+                `Only applicable in server-side environments` // Wrong
             ],
-            // Randomize correct answer index
+            // Always index 0 correct for this mock
             correctAnswers: [0],
             type: "single"
         });

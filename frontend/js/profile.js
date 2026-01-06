@@ -457,8 +457,16 @@ document.addEventListener("DOMContentLoaded", async () => {
           a.click();
           a.remove();
         } else {
-          const d = await res.json();
-          alert(d.msg || "Error");
+          // Try to parse error message
+          let errMsg = "Unknown Error";
+          try {
+            const d = await res.json();
+            errMsg = d.msg || d.error || JSON.stringify(d);
+          } catch (parseErr) {
+            errMsg = await res.text(); // Fallback if not JSON
+          }
+          console.error("Certificate Download Error:", errMsg);
+          alert(`Download failed: ${errMsg}`);
         }
       } catch (e) {
         console.error(e);

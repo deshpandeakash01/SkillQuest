@@ -19,16 +19,28 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function setupFilters() {
-  // Search Input
+  // Search Input - Enter Key
   const searchInput = document.getElementById("searchInput");
   if (searchInput) {
-    searchInput.addEventListener("input", (e) => {
-      searchTerm = e.target.value.toLowerCase();
+    searchInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        searchTerm = e.target.value.toLowerCase();
+        applyFilters();
+      }
+    });
+  }
+
+  // Search Button - Click
+  const searchBtn = document.getElementById("searchBtn");
+  if (searchBtn) {
+    searchBtn.addEventListener("click", () => {
+      const val = document.getElementById("searchInput")?.value || "";
+      searchTerm = val.toLowerCase();
       applyFilters();
     });
   }
 
-  // Category Dropdown (New)
+  // Category Dropdown - Change
   const categorySelect = document.getElementById("categorySelect");
   if (categorySelect) {
     categorySelect.addEventListener("change", (e) => {
@@ -108,7 +120,14 @@ function renderSkills(skills) {
       if (skill.isCompleted) {
         actionBtn = `<button class="btn btn-secondary w-full" disabled>Completed</button>`;
       } else {
-        actionBtn = `<button class="btn btn-primary w-full" onclick="completeSkill('${skill._id}', '${skill.tutor}')">Mark Complete</button>`;
+        // UPDATED: Redirect to Quiz Page instead of instant complete
+        // If quizId exists, go there. Check compatibility.
+        if (skill.quizId) {
+          actionBtn = `<button class="btn btn-primary w-full" onclick="goToQuiz('${skill.quizId}')">Take Quiz Result</button>`;
+        } else {
+          // Fallback for old skills without quiz
+          actionBtn = `<button class="btn btn-primary w-full" onclick="completeSkill('${skill._id}', '${skill.tutor}')">Mark Complete</button>`;
+        }
       }
     } else {
       // Not enrolled, not teaching

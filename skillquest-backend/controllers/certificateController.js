@@ -1,7 +1,3 @@
-const PDFDocument = require("pdfkit");
-const QRCode = require("qrcode");
-const User = require("../models/User");
-
 exports.issueCertificate = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -15,14 +11,16 @@ exports.issueCertificate = async (req, res) => {
             return res.status(403).json({ msg: "You must complete the quiz with 60% score before claiming certificate." });
         }
 
-        // Generate QR Code
+        // Generate QR Code (As Buffer)
         const verificationData = JSON.stringify({
             user: user.name,
             skill: skillName,
             date: new Date().toISOString(),
             issuer: "SkillQuest"
         });
-        const qrCodeDataUrl = await QRCode.toDataURL(verificationData);
+
+        // FIX: Use toBuffer instead of toDataURL to safely pass to pdfkit
+        const qrCodeBuffer = await QRCode.toBuffer(verificationData);
 
         const doc = new PDFDocument({ layout: "landscape", size: "A4" });
 
@@ -77,8 +75,6 @@ exports.issueCertificate = async (req, res) => {
 
         // Underline name
         const nameWidth = doc.widthOfString(user.name);
-        // Approximate centering: (width - nameWidth)/2 
-        // Drawing a line below text requires specific x,y. Let's rely on flow or just simple separator line.
 
         doc.moveDown(0.5);
         // Dashed line separator
@@ -137,12 +133,15 @@ exports.issueCertificate = async (req, res) => {
 
         // --- QR CODE ---
         // Place QR Code in bottom corner area
-        doc.image(qrCodeDataUrl, width / 2 - 25, height - 130, { width: 50 });
+        doc.image(qrCodeBuffer, width / 2 - 25, height - 130, { width: 50 });
 
         doc.end();
 
     } catch (err) {
         console.error(err);
-        res.status(500).json({ msg: "Certificate generation failed" });
+        // If headers already sent, we can't send json.
+        if (!res.headersSent) {
+            res.status(500).json({ msg: "Certificate generation failed" });
+        }
     }
 };
