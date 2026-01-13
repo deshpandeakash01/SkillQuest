@@ -1,3 +1,7 @@
+const PDFDocument = require('pdfkit');
+const QRCode = require('qrcode');
+const User = require('../models/User');
+
 exports.issueCertificate = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -20,7 +24,14 @@ exports.issueCertificate = async (req, res) => {
         });
 
         // FIX: Use toBuffer instead of toDataURL to safely pass to pdfkit
-        const qrCodeBuffer = await QRCode.toBuffer(verificationData);
+        let qrCodeBuffer;
+        try {
+            qrCodeBuffer = await QRCode.toBuffer(verificationData);
+        } catch (qrErr) {
+            console.error("QR Generation Error:", qrErr);
+            // Fallback or fail? Fail for now
+            return res.status(500).json({ msg: "Failed to generate verification code" });
+        }
 
         const doc = new PDFDocument({ layout: "landscape", size: "A4" });
 
@@ -65,7 +76,7 @@ exports.issueCertificate = async (req, res) => {
             .text("Certificate of Achievement", { align: "center" });
 
         doc.moveDown(0.5);
-        doc.font("Times-Roman").fontSize(10).fillColor("#64748b").characterSpacing(2)
+        doc.font("Times-Roman").fontSize(10).fillColor("#64748b")
             .text("THE FOLLOWING AWARD IS GIVEN TO", { align: "center" });
 
         // --- RECIPIENT NAME ---

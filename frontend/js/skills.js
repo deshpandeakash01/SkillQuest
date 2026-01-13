@@ -79,7 +79,7 @@ async function fetchSkills() {
     allSkills = await res.json(); // Store globally
 
     // Also fetch user credit balance for display
-    fetchProfile();
+    await fetchProfile();
 
     applyFilters(); // Initial render
   } catch (err) {
@@ -134,7 +134,9 @@ function renderSkills(skills) {
       actionBtn = `<button class="btn btn-glow w-full" onclick="enrollSkill('${skill._id}')">Enroll Now</button>`;
 
       // If user created it but isn't marked as 'teaching' (edge case, but handled)
-      if (currentUser && skill.tutor === currentUser._id) {
+      // Check both currentUser._id (if object) or currentUser.id
+      const currentUserId = currentUser ? (currentUser._id || currentUser.id) : null;
+      if (currentUserId && skill.tutor === currentUserId) {
         actionBtn = `<button class="btn btn-secondary w-full" disabled>Your Skill</button>`;
       }
     }
@@ -297,4 +299,8 @@ async function fetchProfile() {
       }
     }
   } catch (e) { console.error("Profile fetch error", e); }
+}
+
+function goToQuiz(quizId) {
+  window.location.href = `quiz_take.html?id=${quizId}`;
 }

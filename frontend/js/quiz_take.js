@@ -26,6 +26,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("quizTitle").textContent = quiz.title;
         document.getElementById("quizMeta").textContent = `Created by ${quiz.teacher}`;
 
+        // Store for certificate
+        const titleParts = quiz.title.split(':');
+        if (titleParts.length > 1) {
+            let sName = titleParts[1].split('(')[0].trim();
+            window.currentSkillName = sName;
+        }
+
         quiz.questions.forEach((q, index) => {
             const card = document.createElement("div");
             card.className = "question-card";
@@ -81,6 +88,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             document.getElementById("resultBox").style.display = "block";
             document.getElementById("scoreVal").textContent = `${result.score} / ${result.total}`;
+
+            // Restore Certificate Button
+            if (result.passed) {
+                const resultBox = document.getElementById("resultBox");
+                if (!document.getElementById("certBtn")) {
+                    const certBtn = document.createElement("button");
+                    certBtn.id = "certBtn";
+                    certBtn.className = "btn btn-primary";
+                    certBtn.style.marginTop = "15px";
+                    certBtn.textContent = "📄 Download Certificate";
+                    certBtn.onclick = () => downloadCertificate(quizId);
+                    resultBox.appendChild(certBtn);
+                }
+            }
+
             window.scrollTo(0, 0);
 
         } catch (err) {
@@ -89,3 +111,36 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 });
+
+async function downloadCertificate(quizId) {
+    const token = localStorage.getItem("token");
+
+    if (!window.currentSkillName) {
+        alert("Skill name missing, cannot download certificate directly. Go to Profile.");
+        return;
+    }
+
+    try {
+        const res = await fetch("http://localhost:5000/api/protected/certificate/issue", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ skillName: window.currentSkillName })
+        });
+
+        if (res.ok) {
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `Certificate-${window.currentSkillName}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } else {
+            alert("Certificate generation failed.");
+        }
+    } catch (e) { console.error(e); alert("Error downloading certificate"); }
+}

@@ -32,16 +32,50 @@ exports.createQuiz = async (req, res) => {
 
 exports.getQuiz = async (req, res) => {
     try {
+        console.log("GET QUIZ: Request for ID:", req.params.id);
         const quiz = await Quiz.findById(req.params.id).populate("teacher", "name");
-        if (!quiz) return res.status(404).json({ msg: "Quiz not found" });
+        if (!quiz) {
+            console.log("GET QUIZ: Quiz not found in DB");
+            return res.status(404).json({ msg: "Quiz not found" });
+        }
 
         const user = await User.findById(req.user.id);
+        if (!user) {
+            console.log("GET QUIZ: User not found");
+            return res.status(404).json({ msg: "User not found" });
+        }
+
+        console.log("GET QUIZ: Found Quiz:", quiz.title);
+
         const skill = await Skill.findOne({ quizId: quiz._id });
-        if (!skill) return res.status(404).json({ msg: "Skill not found for this quiz" });
+        if (!skill) {
+            console.log("GET QUIZ: Skill link not found for quizId:", quiz._id);
+            return res.status(404).json({ msg: "Skill not found for this quiz" });
+        }
+
+        console.log("GET QUIZ: Linked Skill:", skill.name);
+
+        console.log("GET QUIZ: Reached History Check");
+
+        if (!user.quizHistory) {
+            console.log("GET QUIZ: quizHistory missing, initializing.");
+            user.quizHistory = new Map();
+        }
 
         // Retrieve History
-        let history = user.quizHistory.get(skill.name);
+        let history;
+        if (user.quizHistory instanceof Map) {
+            history = user.quizHistory.get(skill.name);
+        } else {
+            // Fallback if somehow not a Map (legacy data?)
+            console.log("GET QUIZ: quizHistory is not a Map!", user.quizHistory);
+            // Force reset
+            user.quizHistory = new Map();
+            history = undefined;
+        }
+
         if (!history) {
+            console.log("GET QUIZ: New history entry for skill");
             history = { attempts: 0, bestScore: 0, currentQuestions: [] };
         }
 
@@ -57,8 +91,10 @@ exports.getQuiz = async (req, res) => {
         const levels = ["Medium", "Hard", "Expert", "Master", "Legendary"];
         const difficulty = levels[history.attempts] || "Legendary";
 
+        console.log("GET QUIZ: Generating questions...");
         // Generate NEW Questions
         const generated = await aiService.generateQuiz(skill.name, difficulty, quiz.questions.length || 5);
+        console.log("GET QUIZ: Questions generated");
 
         // Store Session in User DB (currentQuestions)
         history.currentQuestions = generated.questions;
@@ -90,8 +126,8 @@ exports.getQuiz = async (req, res) => {
         });
 
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ msg: "Server error" });
+        console.error("GET QUIZ ERROR:", err);
+        res.status(500).json({ msg: "Server error calling AI" });
     }
 };
 

@@ -253,12 +253,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     setText("profile-email", user.email);
 
     /* =====================
-       CREDITS
+       CREDITS & STATS
        ===================== */
     const credits = user.credits || {};
     setText("credits-available", credits.available ?? 0);
     setText("credits-earned", credits.earned ?? 0);
-    setText("credits-spent", credits.spent ?? 0);
+    // setText("credits-spent", credits.spent ?? 0); // Removed or not needed in summary
+
+    // Counts
+    setText("teaching-count", user.skillsTeach ? user.skillsTeach.length : 0);
+    setText("learning-count", user.skillsCompleted ? user.skillsCompleted.length : 0); // Or use learning list?
+
+    // Bio (if available in user object)
+    if (user.bio) setText("userBio", user.bio);
+    else setText("userBio", "Ready to learn and teach.");
 
     /* =====================
        SKILLS SECTIONS
@@ -470,7 +478,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       } catch (e) {
         console.error(e);
-        alert("Download failed");
+        alert("Download failed - Network or Server Error");
       }
     };
 
@@ -552,7 +560,16 @@ function renderSkills(containerId, skillNamesList, skillMap = {}, isLearning = f
         const btn = document.createElement("button");
         btn.className = "btn btn-sm btn-primary";
         btn.textContent = "Take Quiz 📝";
-        btn.onclick = () => window.openQuiz(name);
+
+        // Use quizId if available
+        if (fullSkill.quizId) {
+          btn.onclick = () => {
+            window.location.href = `quiz_take.html?id=${fullSkill.quizId}`;
+          };
+        } else {
+          btn.onclick = () => alert("Quiz not ready for this skill yet.");
+        }
+
         div.appendChild(btn);
       }
     }
