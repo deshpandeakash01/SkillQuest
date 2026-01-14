@@ -24,8 +24,19 @@ connectDB(process.env.MONGODB_URI);
 app.use(helmet({
   contentSecurityPolicy: false,
 }));
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
+app.use((req, res, next) => {
+  console.log(`[REQUEST] ${req.method} ${req.url}`);
+  next();
+});
+
+app.use(express.json({ limit: "500mb" }));
+app.use(express.urlencoded({ extended: true, limit: "500mb" }));
 
 // Rate Limiting
 const limiter = rateLimit({
@@ -109,8 +120,9 @@ app.get("/api/test-auth", authMiddleware, (req, res) => {
 
 
 // start server (LAST)
-server.listen(PORT, () =>
+server.listen(PORT, '0.0.0.0', () =>
   console.log(`Server running on port ${PORT}`)
 );
+server.timeout = 0; // Disable timeout for large uploads
 
 

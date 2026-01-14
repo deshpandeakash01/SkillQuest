@@ -9,11 +9,18 @@ window.onerror = function (msg, url, line, col, error) {
 };
 
 // DEBUG: Verifying script load
-alert("Debug: Live.js Script Loaded");
+// DEBUG: Verifying script load
+console.log("Debug: Live.js Script Loaded");
+
+// Connection Test
+fetch("http://localhost:5000/api")
+    .then(res => res.text())
+    .then(text => console.log("Debug: Backend Connection OK:", text))
+    .catch(err => alert("Debug: Backend Connection FAILED. Ensure server is running on port 5000. Error: " + err.message));
 
 // GLOBAL PUBLISH HANDLER (Moved to top to ensure definition)
 window.publishSkill = async function () {
-    alert("Debug: Handle Publish Triggered!"); // Checking if click reaches here
+    // alert("Debug: Handle Publish Triggered!"); // Checking if click reaches here
     console.log("Handle Publish triggered");
 
     const titleVal = document.getElementById("skillTitleInput")?.value;
@@ -98,24 +105,7 @@ const btnStopRecord = document.getElementById("btnStopRecord");
 const btnUploadVideo = document.getElementById("btnUploadVideo");
 const videoUploadInput = document.getElementById("videoUploadInput");
 
-// DEBUG: Check for elements
-if (!document.getElementById("btnConfirmPublish")) {
-    alert("CRITICAL DEBUG: 'btnConfirmPublish' not found in DOM!");
-} else {
-    console.log("Debug: btnConfirmPublish found");
-}
-
-const btnConfirmPublish = document.getElementById("btnConfirmPublish");
-if (btnConfirmPublish) {
-    console.log("Debug: Attaching click listener to btnConfirmPublish");
-    btnConfirmPublish.addEventListener("click", (e) => {
-        // e.preventDefault();
-        console.log("Debug: Publish button clicked via listener");
-        publishSkill();
-    });
-} else {
-    console.error("Critical: btnConfirmPublish not found!");
-}
+// REMOVED: btnConfirmPublish listener to prevent double submission (handled by onclick in HTML)
 
 // AI Notes
 const aiNotesPlaceholder = document.getElementById("aiNotesPlaceholder");
@@ -157,7 +147,7 @@ async function init() {
         console.log("Debug: Initializing PeerJS with Local Server at " + window.location.hostname + ":" + window.location.port);
         peer = new Peer(undefined, {
             host: window.location.hostname,
-            port: window.location.port || 5000,
+            port: 5000,
             path: "/peerjs",
             debug: 3 // Detailed logging
         });

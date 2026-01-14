@@ -41,7 +41,13 @@ router.get("/quiz/:id", authMiddleware, quizController.getQuiz);
 router.post("/quiz/:id/submit", authMiddleware, quizController.submitQuiz);
 
 // 4.5. Publish Skill (Rich Upload)
-router.post("/skills/publish", authMiddleware, upload.single("video"), skillController.publishSkill);
+router.post("/skills/publish",
+  (req, res, next) => { console.log("Debug: Pre-Auth Middleware for Publish"); next(); },
+  authMiddleware,
+  (req, res, next) => { console.log("Debug: Post-Auth, Pre-Multer for Publish"); next(); },
+  upload.single("video"),
+  skillController.publishSkill
+);
 
 // 5. Profile Updates
 router.post("/profile/update", authMiddleware, profileController.updateProfile);

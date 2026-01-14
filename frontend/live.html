@@ -205,7 +205,8 @@
                     <button
                         onclick="alert('Debug: Cancel Click'); document.getElementById('uploadModal').style.display='none'"
                         class="btn btn-secondary" style="flex: 1;">Cancel</button>
-                    <button id="btnConfirmPublish" class="btn btn-primary" style="flex: 1;">Publish</button>
+                    <button id="btnConfirmPublish" class="btn btn-primary" style="flex: 1;"
+                        onclick="publishSkill()">Publish</button>
                 </div>
 
             </div>
@@ -217,67 +218,7 @@
     <script src="js/theme.js"></script>
     <script src="js/live.js?v=debug3"></script>
 
-    <!-- EMERGENCY FIX: INLINE PUBLISH LOGIC -->
-    <script>
-        console.log("Emergency Publish Script Loaded");
 
-        async function forcePublish() {
-            alert("Debug: Force Publish Triggered!");
-            console.log("Force Publish Triggered");
-
-            const titleVal = document.getElementById("skillTitleInput")?.value;
-            const categoryVal = document.getElementById("skillCategoryInput")?.value;
-            const outcomeVal = document.getElementById("skillOutcomeInput")?.value;
-            const fileInput = document.getElementById("videoFileInput");
-            const file = fileInput?.files[0];
-
-            if (!titleVal || !outcomeVal || !file) {
-                return alert("Please fill all fields and select a video.");
-            }
-
-            const progress = document.getElementById("uploadProgress");
-            const progressContainer = document.getElementById("progressContainer");
-
-            if (progressContainer) {
-                progressContainer.style.display = "block";
-                if (progress) progress.style.width = "30%";
-            }
-
-            const formData = new FormData();
-            formData.append("name", titleVal);
-            formData.append("category", categoryVal);
-            formData.append("outcome", outcomeVal);
-            formData.append("creditCost", 5);
-            // Default quiz values if missing
-            formData.append("quizDifficulty", "Medium");
-            formData.append("quizNumQuestions", 5);
-            formData.append("video", file);
-
-            const token = localStorage.getItem("token");
-            if (!token) return alert("You are not logged in!");
-
-            try {
-                const res = await fetch("http://localhost:5000/api/protected/skills/publish", {
-                    method: "POST",
-                    headers: { "Authorization": "Bearer " + token },
-                    body: formData
-                });
-
-                const data = await res.json();
-
-                if (progress) progress.style.width = "100%";
-
-                if (res.ok) {
-                    alert("Skill Published Successfully!");
-                    document.getElementById("uploadModal").style.display = "none";
-                } else {
-                    alert("Publish Failed: " + (data.msg || JSON.stringify(data)));
-                }
-            } catch (err) {
-                alert("Network Error: " + err.message);
-            }
-        }
-    </script>
 </body>
 
 </html>
