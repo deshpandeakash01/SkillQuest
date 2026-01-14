@@ -1,10 +1,39 @@
+// Resource Cleanup Imports
 const User = require("../models/User");
+const Skill = require("../models/Skill");
+const Quiz = require("../models/Quiz");
+const path = require("path");
+const fs = require("fs");
 
 // Delete Account
 exports.deleteAccount = async (req, res) => {
   try {
-    await User.findByIdAndDelete(req.user.id);
-    res.json({ msg: "User deleted" });
+    const userId = req.user.id;
+
+    // 1. Find Skills created by user
+    const skills = await Skill.find({ createdBy: userId });
+
+    // 2. Delete Video Files
+    for (const skill of skills) {
+      if (skill.videoUrl && !skill.videoUrl.startsWith("http")) { // Only delete local files
+        // Remove leading slash if present to ensure path.join works relatively
+        const relativePath = skill.videoUrl.startsWith("/") ? skill.videoUrl.substring(1) : skill.videoUrl;
+        const filePath = path.join(__dirname, "..", relativePath);
+
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      }
+    }
+
+    // 3. Delete DB Records
+    await Skill.deleteMany({ createdBy: userId });
+    await Quiz.deleteMany({ teacher: userId });
+
+    // 4. Delete User
+    await User.findByIdAndDelete(userId);
+
+    res.json({ msg: "User and all associated content deleted" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Server Error" });
@@ -16,6 +45,7 @@ exports.deleteAccount = async (req, res) => {
    =========================== */
 exports.updateProfile = async (req, res) => {
   try {
+    console.log("UPDATE PROFILE REQUEST:", req.body);
     const { bio, socialLinks } = req.body; // socialLinks is { github: "url", ... }
     const user = await User.findById(req.user.id);
 
@@ -27,13 +57,13 @@ exports.updateProfile = async (req, res) => {
     // Update Social Links & Calc Bonus
     let bonusCredits = 0;
     if (socialLinks && typeof socialLinks === 'object') {
-      // Initialize if null
-      if (!user.socialLinks) user.socialLinks = {};
+      console.log("Social Links received:", socialLinks);
+      // Initialize if null or not an object
+      if (!user.socialLinks || typeof user.socialLinks !== 'object') {
+        user.socialLinks = {};
+      }
 
-      // We need to detect NEW links to give credit.
-      // But since we are using Mixed/Object, user.socialLinks is just an object.
-      // We iterate the incoming keys.
-
+      // We iteration the incoming keys.
       for (const [platform, url] of Object.entries(socialLinks)) {
         if (url && url.trim() !== "") {
           // Check if this platform was already present and had a value
@@ -44,7 +74,9 @@ exports.updateProfile = async (req, res) => {
           user.socialLinks[platform] = url.trim();
         } else {
           // remove if empty
-          delete user.socialLinks[platform];
+          if (user.socialLinks[platform]) {
+            delete user.socialLinks[platform];
+          }
         }
       }
 
@@ -54,13 +86,18 @@ exports.updateProfile = async (req, res) => {
 
     // Apply Bonus
     if (bonusCredits > 0) {
-      if (!user.credits) user.credits = { available: 0, earned: 0, spent: 0 };
-      user.credits.earned = (user.credits.earned || 0) + bonusCredits;
-      user.credits.available = (user.credits.available || 0) + bonusCredits;
+      if (!user.credits) user.credits = {};
+      // Ensure sub-properties exist
+      if (typeof user.credits.earned !== 'number') user.credits.earned = 0;
+      if (typeof user.credits.available !== 'number') user.credits.available = 0;
+
+      user.credits.earned += bonusCredits;
+      user.credits.available += bonusCredits;
       user.markModified('credits');
     }
 
     await user.save();
+    console.log("Profile Saved Successfully");
 
     res.json({
       msg: "Profile updated",
@@ -73,8 +110,8 @@ exports.updateProfile = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Server error" });
+    console.error("UPDATE PROFILE ERROR:", err);
+    res.status(500).json({ msg: "Server error", error: err.message });
   }
 };
 
@@ -127,11 +164,15 @@ exports.deleteProfilePicture = async (req, res) => {
    =========================== */
 exports.getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
-    if (!user) return res.status(404).json({ msg: "User not found" });
-    res.json(user);
+    // Middleware already fetches user
+    if (!req.user) {
+      console.error("GET ME: No user in req");
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    res.json(req.user);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Server error" });
+    console.error("GET ME ERROR:", err);
+    res.status(500).json({ msg: "Server error", error: err.message, stack: err.stack });
   }
 };

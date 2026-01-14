@@ -163,3 +163,70 @@ body.light .activity-list li {
 .secondary-cta-btn:hover {
   background: #555;
 }
+
+/* =====================
+   MODAL STYLES
+   ===================== */
+.modal {
+  display: none;
+  /* Hidden by default */
+  position: fixed;
+  /* Stay in place */
+  z-index: 1000;
+  /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%;
+  /* Full width */
+  height: 100%;
+  /* Full height */
+  overflow: auto;
+  /* Enable scroll if needed */
+  background-color: rgba(0, 0, 0, 0.85);
+  /* Black w/ opacity */
+
+  /* Centering */
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background-color: #1f1f1f;
+  margin: auto;
+  padding: 2rem;
+  border: 1px solid #333;
+  border-radius: 12px;
+  width: 35%;
+  /* Approx 1/3rd */
+  max-width: 500px;
+  min-width: 350px;
+
+  /* Flexbox Centering Fix */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  animation: modalFadeIn 0.3s ease;
+}
+
+body.light .modal-content {
+  background: #fff;
+  border-color: #ddd;
+  color: #333;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

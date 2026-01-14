@@ -242,15 +242,30 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
 
-    if (!res.ok) throw new Error("Unauthorized");
+    if (!res.ok) {
+      if (res.status === 401) throw new Error("Unauthorized");
+      throw new Error(`Server Error (${res.status})`);
+    }
 
     const user = await res.json();
+    currentUserData = user; // Store for edit modal
 
     /* =====================
        BASIC INFO
        ===================== */
     setText("welcome-message", `Welcome, ${user.name}`);
     setText("profile-email", user.email);
+
+    // Profile Picture Logic
+    const picEl = document.getElementById("profile-pic");
+    if (picEl) {
+      if (user.profilePicture) {
+        picEl.src = user.profilePicture;
+      } else {
+        // Generate avatar based on name
+        picEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`;
+      }
+    }
 
     /* =====================
        CREDITS & STATS
@@ -282,9 +297,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       skillsData.forEach(s => allSkillsMap[s.name] = s);
     } catch (e) { console.error("Failed to load skills map"); }
 
-    renderSkills("user-teaching", user.skillsTeach, allSkillsMap, false);
-    renderSkills("user-learning", user.skillsLearning, allSkillsMap, true); // Enable Quiz
-    renderSkills("user-interests", user.skillsInterested, allSkillsMap, false);
+    renderSkills("user-teaching", user.skillsTeach, allSkillsMap, false, true); // isLearning=false, isTeaching=true
+    renderSkills("user-learning", user.skillsLearning, allSkillsMap, true, false); // Enable Quiz
+    renderSkills("user-interests", user.skillsInterested, allSkillsMap, false, false);
 
     /* =====================
        ACTIVITY
@@ -530,7 +545,7 @@ function setText(id, value) {
   if (el) el.textContent = value;
 }
 
-function renderSkills(containerId, skillNamesList, skillMap = {}, isLearning = false) {
+function renderSkills(containerId, skillNamesList, skillMap = {}, isLearning = false, isTeaching = false) {
   const container = document.getElementById(containerId);
   if (!container) return;
 
@@ -547,21 +562,20 @@ function renderSkills(containerId, skillNamesList, skillMap = {}, isLearning = f
 
     const span = document.createElement("span");
     span.textContent = name;
-
     div.appendChild(span);
 
-    // If it's the "Learning" list, add Actions
+    // Actions Wrapper
+    const actionsDiv = document.createElement("div");
+    actionsDiv.style.display = "flex";
+    actionsDiv.style.gap = "10px";
+
+    // LEARING MODE: Take Quiz
     if (isLearning) {
       const fullSkill = skillMap[name];
       if (fullSkill) {
-        // Check if user already completed it? (We don't have completed list in local 'user' var here unless we reload or check updated field)
-        // But we can just show "Take Quiz" or "Certificate" if we knew.
-        // For now, simpler: "Take Quiz" always available.
         const btn = document.createElement("button");
         btn.className = "btn btn-sm btn-primary";
         btn.textContent = "Take Quiz 📝";
-
-        // Use quizId if available
         if (fullSkill.quizId) {
           btn.onclick = () => {
             window.location.href = `quiz_take.html?id=${fullSkill.quizId}`;
@@ -569,14 +583,163 @@ function renderSkills(containerId, skillNamesList, skillMap = {}, isLearning = f
         } else {
           btn.onclick = () => alert("Quiz not ready for this skill yet.");
         }
-
-        div.appendChild(btn);
+        actionsDiv.appendChild(btn);
       }
     }
 
+    // TEACHING MODE: Delete Skill
+    if (isTeaching) {
+      const fullSkill = skillMap[name];
+      if (fullSkill) {
+        const delBtn = document.createElement("button");
+        delBtn.className = "btn btn-sm btn-danger"; // Assuming btn-danger exists or red
+        delBtn.style.backgroundColor = "#cc0000";
+        delBtn.style.color = "white";
+        delBtn.textContent = "Delete 🗑️";
+        delBtn.onclick = () => deleteMySkill(fullSkill._id, name);
+        actionsDiv.appendChild(delBtn);
+      }
+    }
+
+    div.appendChild(actionsDiv);
     container.appendChild(div);
   });
 }
+
+// Delete Logic
+window.deleteMySkill = async (skillId, skillName) => {
+  if (!confirm(`Are you sure you want to delete "${skillName}"? This will remove the video and quiz permanently.`)) return;
+
+  try {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`http://localhost:5000/api/skills/${skillId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (res.ok) {
+      alert(`"${skillName}" deleted.`);
+      location.reload();
+    } else {
+      const data = await res.json();
+      alert("Delete failed: " + data.msg);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Error deleting skill.");
+  }
+};
+
+// Store user globally for edit modal
+let currentUserData = null;
+
+// ===================================
+// EDIT PROFILE LOGIC
+// ===================================
+// ===================================
+// EDIT PROFILE LOGIC
+// ===================================
+window.openEditModal = () => {
+  if (!currentUserData) return alert("Profile data not loaded.");
+  const modal = document.getElementById("editProfileModal");
+
+  // Bio
+  document.getElementById("edit-bio").value = currentUserData.bio || "";
+
+  // Avatar Preview
+  const avatarPrev = document.getElementById("edit-avatar-preview");
+  if (currentUserData.profilePicture) {
+    avatarPrev.src = currentUserData.profilePicture;
+  } else {
+    avatarPrev.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUserData.name)}&background=random`;
+  }
+
+  // Socials
+  const links = currentUserData.socialLinks || {};
+  document.getElementById("social-github").value = links.github || "";
+  document.getElementById("social-linkedin").value = links.linkedin || "";
+  document.getElementById("social-twitter").value = links.twitter || "";
+  document.getElementById("social-website").value = links.website || "";
+
+  modal.style.display = "flex";
+};
+
+window.closeEditModal = () => {
+  document.getElementById("editProfileModal").style.display = "none";
+};
+
+// Handle Avatar Upload Immediately
+document.getElementById("avatar-upload").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const status = document.getElementById("avatar-status");
+  status.textContent = "Uploading...";
+
+  const formData = new FormData();
+  formData.append("avatar", file);
+
+  try {
+    const token = localStorage.getItem("token");
+    const res = await fetch("http://localhost:5000/api/profile/avatar", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      status.textContent = "Upload successful!";
+      status.style.color = "var(--success)";
+      // Update preview
+      document.getElementById("edit-avatar-preview").src = data.profilePicture;
+      // Update global user object locally so if they close/reopen it persists
+      if (currentUserData) currentUserData.profilePicture = data.profilePicture;
+    } else {
+      status.textContent = "Upload failed: " + data.msg;
+      status.style.color = "var(--danger)";
+    }
+  } catch (err) {
+    console.error(err);
+    status.textContent = "Error uploading.";
+  }
+});
+
+document.getElementById("saveProfileBtn").addEventListener("click", async () => {
+  const bio = document.getElementById("edit-bio").value;
+
+  // Gather socials
+  const socialLinks = {
+    github: document.getElementById("social-github").value.trim(),
+    linkedin: document.getElementById("social-linkedin").value.trim(),
+    twitter: document.getElementById("social-twitter").value.trim(),
+    website: document.getElementById("social-website").value.trim()
+  };
+
+  try {
+    const token = localStorage.getItem("token");
+    const res = await fetch("http://localhost:5000/api/profile", { // PUT /api/profile
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ bio, socialLinks })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert("Profile Updated! " + (data.bonusEarned ? `You earned ${data.bonusEarned} credits!` : ""));
+      window.closeEditModal();
+      location.reload();
+    } else {
+      alert("Update Failed: " + data.msg);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Error updating profile");
+  }
+});
 
 function renderActivity(containerId, activity) {
   const container = document.getElementById(containerId);

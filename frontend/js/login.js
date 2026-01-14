@@ -24,7 +24,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     if (res.ok) {
       localStorage.setItem("token", data.token);
       showToast("Login successful!");
-      setTimeout(() => window.location.href = "portfolio.html", 1000);
+      setTimeout(() => window.location.href = "profile.html", 1000);
     } else {
       showToast(data.msg || "Login failed", true);
     }

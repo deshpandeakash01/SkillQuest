@@ -1,5 +1,7 @@
 const Skill = require("../models/Skill");
 const User = require("../models/User");
+const fs = require("fs");
+const path = require("path");
 
 /* =====================
    GET ALL SKILLS
@@ -351,6 +353,66 @@ exports.publishSkill = async (req, res) => {
 
   } catch (err) {
     console.error("Publish skill error:", err);
+    res.status(500).json({ msg: "Server error" });
+  }
+};
+/* =====================
+   DELETE SKILL
+   ===================== */
+exports.deleteSkill = async (req, res) => {
+  try {
+    const skillId = req.params.id;
+    const userId = req.user.id; // From auth middleware
+
+    const skill = await Skill.findById(skillId);
+
+    if (!skill) {
+      return res.status(404).json({ msg: "Skill not found" });
+    }
+
+    // Check ownership
+    if (skill.createdBy.toString() !== userId) {
+      return res.status(401).json({ msg: "Not authorized to delete this skill" });
+    }
+
+    // DEDUCT CREDITS
+    const user = await User.findById(userId);
+    if (user) {
+      user.credits.available = Math.max(0, (user.credits.available || 0) - 5);
+      user.activity.push(`Deducted 5 credits for deleting ${skill.name}`);
+      await user.save();
+    }
+
+    // 1. Delete Video File
+    if (skill.videoUrl && !skill.videoUrl.startsWith("http")) {
+      const relativePath = skill.videoUrl.startsWith("/") ? skill.videoUrl.substring(1) : skill.videoUrl;
+      const filePath = path.join(__dirname, "..", relativePath);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+
+    // 2. Delete Associated Quiz
+    if (skill.quizId) {
+      await Quiz.findByIdAndDelete(skill.quizId);
+    }
+
+    // 3. Delete Skill DB Record
+    await Skill.findByIdAndDelete(skillId);
+
+    // 4. Remove from User Lists (optional but clean)
+    // We should probably remove it from 'skillsTeach', 'skillsLearning', 'skillsInterested' of ALL users
+    // But that might be heavy. For now, let's just let them point to nothing or handle it on fetch.
+    // Ideally:
+    await User.updateMany(
+      {},
+      { $pull: { skillsTeach: skill.name, skillsLearning: skill.name, skillsInterested: skill.name } }
+    );
+
+    res.json({ msg: "Skill deleted successfully" });
+
+  } catch (err) {
+    console.error("Delete skill error:", err);
     res.status(500).json({ msg: "Server error" });
   }
 };

@@ -33,9 +33,20 @@
     <section class="content-section profile-container">
 
       <!-- Identity -->
-      <section class="profile-section">
-        <h2 id="welcome-message">Loading...</h2>
-        <p><strong>Email:</strong> <span id="profile-email"></span></p>
+      <section class="profile-section" style="display: flex; align-items: center; gap: 20px;">
+        <div style="flex-shrink: 0;">
+          <img id="profile-pic" src="https://via.placeholder.com/100" alt="Profile"
+            style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--secondary);">
+        </div>
+        <div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <h2 id="welcome-message" style="margin-bottom: 5px; font-size: 2rem;">Loading...</h2>
+            <button onclick="openEditModal()" class="btn btn-sm btn-secondary"
+              style="padding: 2px 8px; font-size: 0.8rem;">✏️ Edit</button>
+          </div>
+          <p id="userBio" style="color: var(--text-muted); margin-bottom: 10px; font-style: italic;">...</p>
+          <p style="font-size: 0.9rem; opacity: 0.8;"><strong>Email:</strong> <span id="profile-email"></span></p>
+        </div>
       </section>
 
       <!-- Credit Dashboard -->
@@ -101,7 +112,6 @@
     </section>
   </main>
 
-  <!-- Quiz Modal -->
   <div id="quizModal" class="modal" style="display: none;">
     <div class="modal-content card" style="max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
       <span class="close-modal" onclick="closeQuizModal()"
@@ -110,6 +120,46 @@
       <div id="quizQuestions"></div>
       <div id="quizResult" style="display: none; text-align: center; margin-top: 20px;"></div>
       <button id="submitQuizBtn" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Submit Answers</button>
+    </div>
+  </div>
+
+  <!-- Edit Profile Modal -->
+  <div id="editProfileModal" class="modal" style="display: none;">
+    <div class="modal-content card" style="max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
+      <span class="close-modal" onclick="closeEditModal()" style="float: right; cursor: pointer;">&times;</span>
+      <h2>Edit Profile</h2>
+
+      <!-- Avatar Section -->
+      <div class="mb-4" style="text-align: center; border-bottom: 1px solid #333; padding-bottom: 20px;">
+        <img id="edit-avatar-preview" src=""
+          style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 2px solid var(--primary);">
+        <br>
+        <label for="avatar-upload" class="btn btn-sm btn-secondary" style="cursor: pointer;">📷 Change Picture</label>
+        <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+        <p id="avatar-status" style="font-size: 0.8rem; color: #888; margin-top: 5px;"></p>
+      </div>
+
+      <div class="form-group mb-3">
+        <label>Bio</label>
+        <textarea id="edit-bio" rows="3" class="premium-input"
+          style="width: 100%; background: #222; color: white; border: 1px solid #444; border-radius: 6px; padding: 8px;"></textarea>
+      </div>
+
+      <div class="form-group mb-3">
+        <label>Social Links</label>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <input type="text" id="social-github" placeholder="GitHub URL" class="premium-input"
+            style="background: #222; border: 1px solid #444;">
+          <input type="text" id="social-linkedin" placeholder="LinkedIn URL" class="premium-input"
+            style="background: #222; border: 1px solid #444;">
+          <input type="text" id="social-twitter" placeholder="Twitter URL" class="premium-input"
+            style="background: #222; border: 1px solid #444;">
+          <input type="text" id="social-website" placeholder="Portfolio / Website" class="premium-input"
+            style="background: #222; border: 1px solid #444;">
+        </div>
+      </div>
+
+      <button id="saveProfileBtn" class="btn btn-primary" style="width: 100%;">Save Changes</button>
     </div>
   </div>
 
