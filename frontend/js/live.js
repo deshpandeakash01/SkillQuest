@@ -61,7 +61,7 @@ window.publishSkill = async function () {
 
     try {
         console.log("Debug: Sending publish request...");
-        const res = await fetch("http://localhost:5000/api/protected/skills/publish", {
+        const res = await fetch("http://localhost:5000/api/skills/publish", {
             method: "POST",
             headers: { "Authorization": `Bearer ${token}` },
             body: formData

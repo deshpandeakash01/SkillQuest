@@ -67,28 +67,34 @@ document.addEventListener("DOMContentLoaded", () => {
   const heroCtaBtn = document.getElementById("hero-cta-btn");
   if (!nav) return;
 
-  nav.innerHTML = `
-    <li><a href="index.html#overview">Overview</a></li>
-    <li><a href="skills.html">Share Skill</a></li>
-  `;
+  // Common Links
+  const marketplaceLink = `<li><a href="skills.html">Marketplace</a></li>`;
 
   if (token) {
-    nav.innerHTML += `
-      <li><a href="profile.html">Profile</a></li>
+    // 🔐 Logged In View
+    nav.innerHTML = `
+      ${marketplaceLink}
+      <li><a href="live.html">Live Classes</a></li>
+      <li><a href="profile.html">Dashboard</a></li>
       <li><button id="logout-btn" class="nav-logout-btn">Logout</button></li>
     `;
+
     document.getElementById("logout-btn").onclick = () => {
       localStorage.removeItem("token");
       window.location.href = "index.html";
     }
+
     if (heroCtaBtn) {
-       heroCtaBtn.textContent = "Go to Profile";
-       heroCtaBtn.href = "profile.html";
+      heroCtaBtn.textContent = "Go to Profile";
+      heroCtaBtn.href = "profile.html";
     };
   } else {
-    nav.innerHTML += `
+    // 🔓 Logged Out View
+    nav.innerHTML = `
+      ${marketplaceLink}
+      <li><a href="index.html#overview">Overview</a></li>
       <li><a href="login.html">Login</a></li>
-      <li><a href="register.html">Get Started</a></li>
+      <li><a href="register.html" class="nav-btn">Get Started</a></li>
     `;
   }
 });

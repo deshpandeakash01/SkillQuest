@@ -9,7 +9,8 @@ const {
   completeSkill,
   rateTeacher,
   uploadVideo,
-  deleteSkill
+  deleteSkill,
+  publishSkill
 } = require("../controllers/skillController");
 
 // Multer Config
@@ -32,6 +33,9 @@ router.post("/complete/:skillId", auth, completeSkill);
 router.post("/teach/:skillId", auth, teachSkill);
 router.post("/rate/:teacherId", auth, rateTeacher);
 router.delete("/:id", auth, deleteSkill);
+
+// Publish Skill Route
+router.post("/publish", auth, upload.single("video"), publishSkill);
 
 // Video Upload Route
 router.post("/upload", auth, upload.single("video"), uploadVideo);
