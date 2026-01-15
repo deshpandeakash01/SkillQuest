@@ -319,7 +319,9 @@ exports.publishSkill = async (req, res) => {
     const difficulty = quizDifficulty || "Medium";
     const numQuestions = quizNumQuestions || 5;
 
-    const quizData = await aiService.generateQuiz(name, difficulty, numQuestions);
+    // Pass videoUrl (which is the relative path like /uploads/filename.mp4)
+    // The aiService will handle resolving it to an absolute path
+    const quizData = await aiService.generateQuiz(name, difficulty, numQuestions, videoUrl);
 
     // 3. Save Quiz
     const newQuiz = await Quiz.create({

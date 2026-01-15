@@ -2,8 +2,8 @@
    HERO SECTION (Premium & Minimalist)
    ===================== */
 #hero {
-  height: 100vh;
-  /* Full screen */
+  min-height: 100vh;
+  /* Full screen minimum */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -18,6 +18,31 @@
   color: white;
   position: relative;
   overflow: hidden;
+  padding: 80px 20px;
+  /* Add padding for mobile */
+}
+
+/* Glass Card for Hero Features */
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  border-radius: 12px;
+  transition: transform 0.3s;
+}
+
+.glass-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--primary);
+}
+
+/* Light Mode Overrides for Glass Card */
+body.light .glass-card {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 /* Subtle glow behind text */
@@ -137,4 +162,58 @@
   font-size: 0.95rem;
   color: #888;
   line-height: 1.6;
+}
+
+/* Light Mode Overrides */
+body.light #hero {
+  background: linear-gradient(to bottom, rgba(240, 240, 250, 0.9), rgba(255, 255, 255, 0.95)), url('../img/bg-connect.jpg');
+  background-size: cover;
+  background-position: center;
+  color: #333;
+}
+
+body.light #hero h2 {
+  background: linear-gradient(135deg, #333 30%, var(--primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+body.light #hero p {
+  color: #555;
+  font-weight: 400;
+}
+
+body.light .content-section {
+  background: #f9f9f9;
+  color: #333;
+}
+
+body.light .cards .card {
+  background: white;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+body.light .cards .card h3 {
+  color: #333;
+}
+
+body.light .cards .card p {
+  color: #666;
+}
+
+/* FIX: Glass Card Text in Light Mode */
+body.light .glass-card h4 {
+  color: #222 !important;
+  font-weight: 700;
+}
+
+body.light .glass-card p {
+  color: #444 !important;
+  font-weight: 500;
+}
+
+
+body.light .cards .card p {
+  color: #666;
 }
